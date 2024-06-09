@@ -1,0 +1,209 @@
+<meta charset="UTF-8">
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Play_YChart (播放YChart谱面) By Bilibili @qaq_fei</title>
+        <link rel="icon" sizes="128x128" id="#icon">
+    </head>
+    <body>
+        <h1>播放YChart谱面</h1>
+        <button type="button" id="#start_button">播放</button> <button type="button" id="#stop_button">停止播放</button>
+        <br>
+        <input type="file" id="#ychart_path">
+        <br> <br>
+        播放速度(非立即生效): <input type="number" value="100.0" onchange="_speed_change()" id="#speed"> %
+        <br>
+        循环播放: <input type="checkbox" id="#loop">
+        <br>
+        循环播放等待时间: <input type="number" value="1.0" onchange="_loopwait_change()" id="#loop_wait"> 秒
+        <br>
+        <p id="#tips"></p>
+        <br>
+        <img id="#Img" style="display:none;">
+        <canvas id="#ImgCanvas" width="1296" height="533" style="display:none;"></canvas>
+        <audio preload="auto" id="#audio_loop" loop="true"></audio>
+        <audio preload="auto" id="#audio_1"></audio>
+        <audio preload="auto" id="#audio_2"></audio>
+        <audio preload="auto" id="#audio_3"></audio>
+        <audio preload="auto" id="#audio_4"></audio>
+        <audio preload="auto" id="#audio_5"></audio>
+        <audio preload="auto" id="#audio_6"></audio>
+        <audio preload="auto" id="#audio_7"></audio>
+        <audio preload="auto" id="#audio_8"></audio>
+        <audio preload="auto" id="#audio_9"></audio>
+        <audio preload="auto" id="#audio_10"></audio>
+        <audio preload="auto" id="#audio_11"></audio>
+        <audio preload="auto" id="#audio_12"></audio>
+        <audio preload="auto" id="#audio_13"></audio>
+        <audio preload="auto" id="#audio_14"></audio>
+        <audio preload="auto" id="#audio_15"></audio>
+        <audio preload="auto" id="#audio_16"></audio>
+        <audio preload="auto" id="#audio_17"></audio>
+        <audio preload="auto" id="#audio_18"></audio>
+        <audio preload="auto" id="#audio_19"></audio>
+        <audio preload="auto" id="#audio_20"></audio>
+        <audio preload="auto" id="#audio_21"></audio>
+        <script type="text/javascript">
+            var _audio_path="..\\"; //资源文件地址
+            function load_audio(audio_path){  //添加资源文件的地址
+                document.getElementById("#icon").href=`${audio_path}Icon`;
+                document.getElementById("#Img").src=`${audio_path}Image`;
+                document.getElementById("#audio_loop").src=`${audio_path}0.wav`;
+                for (i=1 ; i<=21 ; i++){
+                    document.getElementById(`#audio_${i}`).src=`${audio_path}${i}.mp3`;
+                }
+            }
+            load_audio(_audio_path);
+        </script>
+        <br>
+    </body>
+</html>
+
+<script type="text/javascript">
+    var Playing = false; //正在播放
+    var tips = document.getElementById("#tips"); //tips组件
+    var playsound_setTimeout_list=new Array(); //用于暂停
+    var Loop_Input = document.getElementById("#loop");
+    var Loop_Wait_Input = document.getElementById("#loop_wait");
+    var Speed_Input = document.getElementById("#speed");
+    var Speed = 1.00;
+    var Loop_Wait = 1.00;
+    var ImgCanvas = document.getElementById("#ImgCanvas");
+    var ImgCanvas_Context = ImgCanvas.getContext("2d");
+    var ImgCanvas_Img = document.getElementById("#Img");
+    var ImgCanvas_Img_Width = 648;
+    var ImgCanvas_Img_Height = 272;
+    var ImgCanvas_Img_X = 324;
+    var ImgCanvas_Img_Y = 136;
+    var ImgCanvas_Effect_Pos = [[354,192],[432,192],[511,192],[590,192],[668,192],[747,192],[826,192],
+                                [354,269],[432,269],[511,269],[590,269],[668,269],[747,269],[826,269],
+                                [354,346],[432,346],[511,346],[590,346],[668,346],[747,346],[826,346]];
+
+    window.addEventListener("click", function(){ //防止setTimeout休眠
+        document.getElementById("#audio_loop").play();
+    }, false)
+
+    function remove_audio(audio, key){ //回收音频元素
+        audio.remove();
+    }
+
+    function playsound(key){ //播放音频
+        var audio = document.getElementById(`#audio_${key}`); //原audio元素
+        if (audio == null){ //key错误
+            console.log(`playsound key错误:${key}`);
+            return -1;
+        }
+        var audio_copy = audio.cloneNode(true); //复制原audio元素
+        audio_copy.play(); //播放
+        setTimeout(() => remove_audio(audio_copy, key), 5000) //删除元素
+    }
+
+    function set_TipsEmpty(){ //设置tips为空
+        tips.innerHTML="";
+    }
+
+    function set_Playing(value){ //设置Playing的值
+        Playing=value;
+    }
+
+    function _play(ychart_text){
+        var bpm=parseFloat(ychart_text[0].split(" ")[1]);  //获取bpm
+        ychart_text.splice(0, 1);  //将bpn行删除
+        var Play_StartTime = new Date().getTime(); //记录开始时间
+
+        for (i=0 ; i < ychart_text.length ; i++){
+            var now_time = i*(60/bpm);  //将要播放的时间
+
+            if (ychart_text[i].replace("\r","")==="c" || //是否不需要播放
+                ychart_text[i].replace("\r","")===""){
+                continue;
+            }
+
+            if (ychart_text[i][0]==="d"){ //需要播放
+                for (i2=0 ; i2<ychart_text[i].replace("d","").replace(" ","").split(",").length ; i2++){ //循环每一个音符
+                    var playsound_key = ychart_text[i].replace("d","").replace(" ","").split(",")[i2];
+                    playsound_setTimeout_list.push(setTimeout(eval(`() => playsound(${playsound_key})`), (now_time*1000/Speed)+(new Date().getTime()-Play_StartTime)));  //(new Date().getTime()-Play_StartTime):避免解析导致的延迟
+                }
+            }
+        }
+
+        setTimeout(() => set_Playing(false), (now_time*1000/Speed)+(new Date().getTime()-Play_StartTime)) //设置播放完成
+        playsound_setTimeout_list.push(setTimeout(_play_ok_with_loop, (now_time*1000/Speed)+(new Date().getTime()-Play_StartTime)))
+    }
+
+    function _play_ok_with_loop(){ //播放完成 如果有循环 继续播放
+        if(Loop_Input.checked){ //重新播放
+            console.log("循环播放...");
+            playsound_setTimeout_list.push(setTimeout(() => _startbutton_click(false), Loop_Wait*1000));
+        }
+    }
+
+    function _startbutton_click(tips_=true){
+        var file = document.getElementById("#ychart_path").files[0]
+
+        if (file===undefined){
+            if (tips_){
+                tips.innerHTML="请选择文件";
+                setTimeout(set_TipsEmpty, 500);
+            }
+            return 0;
+        }
+
+        if (Playing){
+            if (tips_){
+                tips.innerHTML="正在播放其他YChart文件...";
+                setTimeout(set_TipsEmpty, 500);
+            }
+            return 0;
+        }
+
+        set_Playing(true);  //设置正在播放
+
+        var FileReader_ = new FileReader();
+
+        FileReader_.onload=function(){
+            ychart_text = this.result.replace("\r", "").split("\n"); //去除\r
+            _play(ychart_text);
+        }
+        FileReader_.readAsText(file,"utf-8"); //读取文件
+    }
+
+    function _stopbutton_click(){
+        if (playsound_setTimeout_list.length!=0){
+            for (i=playsound_setTimeout_list.length-1 ; i!=0 ; i--){
+                clearTimeout(playsound_setTimeout_list[i]); //停止播放
+            }
+        }
+        set_Playing(false);
+        tips.innerHTML="已停止播放";
+        setTimeout(set_TipsEmpty, 500);
+    }
+
+    function _speed_change(){ //修改速度
+        if (Speed_Input.valueAsNumber<=0 || Speed_Input.valueAsNumber>25600){
+            tips.innerHTML="请输入合理的值...";
+            setTimeout(set_TipsEmpty, 500);
+            Speed_Input.valueAsNumber = Speed*100; //退回
+            return 0;
+        }
+        Speed = Speed_Input.valueAsNumber/100;
+    }
+
+    function _loopwait_change(){ //修改循环等待时间
+        if (Loop_Wait_Input.valueAsNumber<0 || Loop_Wait_Input.valueAsNumber>15){
+            tips.innerHTML="请输入合理的值...";
+            setTimeout(set_TipsEmpty, 500);
+            Loop_Wait_Input.valueAsNumber = Loop_Wait; //退回
+            return 0;
+        }
+        Loop_Wait = Loop_Wait_Input.valueAsNumber;
+    }
+
+    document.getElementById("#start_button").addEventListener("click", _startbutton_click);
+    document.getElementById("#stop_button").addEventListener("click", _stopbutton_click);
+
+    //绘制ImgCanvas
+    ImgCanvas_Img.addEventListener("load",function(){
+        ImgCanvas_Context.drawImage(ImgCanvas_Img, ImgCanvas_Img_X, ImgCanvas_Img_Y); //绘制Img
+    })
+</script>

@@ -1,0 +1,8 @@
+pynput
+Pillow
+pystray
+pydub
+watchdog
+pywin32
+mido
+pygame

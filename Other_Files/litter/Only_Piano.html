@@ -1,0 +1,94 @@
+<meta charset="UTF-8">
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>离线原琴 By Bilibili @qaq_fei</title>
+        <link rel="icon" sizes="128x128" id="#icon">
+    </head>
+    <body class="body">
+        <img id="#img">
+        <audio preload="auto" id="#audio_loop" loop="true"></audio>
+        <audio preload="auto" id="#audio_1"></audio>
+        <audio preload="auto" id="#audio_2"></audio>
+        <audio preload="auto" id="#audio_3"></audio>
+        <audio preload="auto" id="#audio_4"></audio>
+        <audio preload="auto" id="#audio_5"></audio>
+        <audio preload="auto" id="#audio_6"></audio>
+        <audio preload="auto" id="#audio_7"></audio>
+        <audio preload="auto" id="#audio_8"></audio>
+        <audio preload="auto" id="#audio_9"></audio>
+        <audio preload="auto" id="#audio_10"></audio>
+        <audio preload="auto" id="#audio_11"></audio>
+        <audio preload="auto" id="#audio_12"></audio>
+        <audio preload="auto" id="#audio_13"></audio>
+        <audio preload="auto" id="#audio_14"></audio>
+        <audio preload="auto" id="#audio_15"></audio>
+        <audio preload="auto" id="#audio_16"></audio>
+        <audio preload="auto" id="#audio_17"></audio>
+        <audio preload="auto" id="#audio_18"></audio>
+        <audio preload="auto" id="#audio_19"></audio>
+        <audio preload="auto" id="#audio_20"></audio>
+        <audio preload="auto" id="#audio_21"></audio>
+        <script type="text/javascript">
+            var _audio_path="..\\"; //资源文件地址
+
+            function load_audio(audio_path){  //添加资源文件的地址 / 加载?
+                document.getElementById("#icon").href=`${audio_path}Icon`;
+                document.getElementById("#img").src=`${_audio_path}Image`;
+                document.getElementById("#audio_loop").src=`${audio_path}0.wav`;
+                for (i=1 ; i<=21 ; i++){
+                    document.getElementById(`#audio_${i}`).src=`${audio_path}${i}.mp3`;
+                }
+            }
+
+            load_audio(_audio_path);//加载
+
+            window.addEventListener("click", function(){ //防止setTimeout休眠
+                document.getElementById("#audio_loop").play();
+            }, false)
+
+        </script>
+        <style type="text/css">
+            .body{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        </style>
+        <br>
+    </body>
+</html>
+
+<script type="text/javascript">
+    var map_table_1={"1":"Q","2":"W","3":"E","4":"R","5":"T","6":"Y","7":"U",
+                     "8":"A","9":"S","10":"D","11":"F","12":"G","13":"H","14":"J",
+                     "15":"Z","16":"X","17":"C","18":"V","19":"B","20":"N","21":"M"}
+    var map_table_2={"Q":"1","W":"2","E":"3","R":"4","T":"5","Y":"6","U":"7",
+                     "A":"8","S":"9","D":"10","F":"11","G":"12","H":"13","J":"14",
+                     "Z":"15","X":"16","C":"17","V":"18","B":"19","N":"20","M":"21"}
+
+    function playsound(key){ //播放音频
+        var audio = document.getElementById(`#audio_${key}`); //原audio元素
+        if (audio == null){ //key错误
+            console.log(`playsound key错误:${key}`);
+            return -1;
+        }
+        var audio_copy = audio.cloneNode(true); //复制原audio元素
+        audio_copy.play(); //播放
+        setTimeout(() => audio_copy.remove(), 5000) //删除元素
+    }
+
+    function _keyboard(info){
+        key=info.key.toUpperCase();
+        if (info.repeat){ //重复
+            return 0;
+        }
+        if (!(key in map_table_2)){ //不在21键中
+            return 0;
+        }
+        eval(`() => playsound(${map_table_2[key]})`)()
+        console.log(key);
+    }
+
+    window.addEventListener("keydown", _keyboard);
+</script>
