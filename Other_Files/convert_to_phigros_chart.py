@@ -1,10 +1,16 @@
 from sys import argv
 from os import _exit
 from json import loads,dumps
+from random import randint
 
 if len(argv) < 3:
     print("convert_to_phigros_chart <input_file> <output_file>")
     _exit(0)
+
+def random_type():
+    if randint(1,5) == 1:
+        return 4
+    return 1
 
 try:
     with open(argv[1],"r",encoding="utf-8") as f:
@@ -333,7 +339,7 @@ try:
                 data["judgeLineList"][0]["notesAbove"].append({
                     "time":phigros_time,
                     "floorPosition":phigros_floor_position,
-                    "type":1,
+                    "type":random_type(),
                     "holdTime":0.0,
                     "speed":speed,
                     "positionX":phigros_positionX
